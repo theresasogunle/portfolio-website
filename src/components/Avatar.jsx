@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAnimations, useFBX, useGLTF, useScroll } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { useMobile } from "../hooks/useMobile";
 
 export function Avatar(props) {
   const { nodes, materials } = useGLTF("/models/me.glb");
@@ -13,6 +14,7 @@ export function Avatar(props) {
   const { animations: walkingAnimations } = useFBX("/animations/Walking.fbx");
 
   const group = useRef();
+  const { isMobile } = useMobile();
   idleAnimations[0].name = "Idle";
   walkingAnimations[0].name = "Walking";
   const [animation, setAnimation] = useState("Walking");
@@ -38,9 +40,9 @@ export function Avatar(props) {
       setAnimation("Walking");
 
       if (scrollDelta > 0) {
-        rotationTarget = 0;
+        rotationTarget = isMobile ? Math.PI / 2 : 0;
       } else {
-        rotationTarget = Math.PI;
+        rotationTarget = isMobile ? -Math.PI / 2 : Math.PI;
       }
     } else {
       setAnimation("Idle");

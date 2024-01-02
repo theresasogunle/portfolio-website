@@ -1,6 +1,6 @@
 import { ContactShadows, Environment, useScroll } from "@react-three/drei";
 import { Avatar } from "./Avatar";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SectionTitle } from "./SectionTitle";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -20,6 +20,8 @@ import { Mailbox } from "./Mailbox";
 import { ParkBench } from "./ParkBench";
 import { Pigeon } from "./Pigeon";
 import { motion } from "framer-motion-3d";
+import { MonitorScreen } from "./MonitorScreen";
+import { useMobile } from "../hooks/useMobile";
 
 const SECTION_DISTANCE = 10;
 
@@ -28,18 +30,45 @@ export const Experience = () => {
   const scrollData = useScroll();
   const [section, setSection] = useState(config.sections[0]);
 
+  const { isMobile, scaleFactor } = useMobile();
+
   useFrame(() => {
-    sceneContainer.current.position.z =
-      -scrollData.offset * SECTION_DISTANCE * scrollData.pages - 1;
+    if (isMobile) {
+      sceneContainer.current.position.x =
+        -scrollData.offset * SECTION_DISTANCE * (scrollData.pages - 1);
+      sceneContainer.current.position.z = 0;
+    } else {
+      sceneContainer.current.position.z =
+        -scrollData.offset * SECTION_DISTANCE * (scrollData.pages - 1);
+      sceneContainer.current.position.x = 0;
+    }
 
     setSection(
       config.sections[Math.round(scrollData.offset * (scrollData.pages - 1))]
     );
   });
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const sectionIndex = config.sections.indexOf(
+        window.location.hash.replace("#", "")
+      );
+      if (sectionIndex !== -1) {
+        scrollData.el.scrollTo(
+          0,
+          (sectionIndex / (config.sections.length - 1)) *
+            (scrollData.el.scrollHeight - scrollData.el.clientHeight)
+        );
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange();
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
   return (
     <>
       <Environment preset="sunset" />
-      <Avatar />
+      <Avatar position-z={isMobile ? -5 : 0} />
 
       <ContactShadows opacity={0.5} scale={[30, 30]} color="#9ce66" />
       <mesh position-y={-0.001} rotation-x={-Math.PI / 2}>
@@ -49,12 +78,12 @@ export const Experience = () => {
       <motion.group ref={sceneContainer} animate={section}>
         {/* HOME */}
         <motion.group position-y={-5} variants={{ home: { y: 0 } }}>
-          <Star position-z={0} position-y={2.2} scale={0.3} />
+          <Star position-y={2.2} scale={0.3} position-z={isMobile ? -5 : 0} />
           <Float floatIntensity={2} speed={2}>
             <MacBookPro
-              position-x={-1}
-              position-y={0.5}
-              position-z={0}
+              position-x={isMobile ? -0.5 : -1}
+              position-y={isMobile ? 1 : 0.5}
+              position-z={isMobile ? -2 : 0}
               scale={0.3}
               rotation-y={Math.PI / 4}
             />
@@ -62,41 +91,44 @@ export const Experience = () => {
           <PalmTree
             scale={0.018}
             rotation-y={THREE.MathUtils.degToRad(140)}
-            position={[4, 0, -5]}
+            position={isMobile ? [1, 0, -4] : [scaleFactor * 4, 0, -5]}
           />
-          <Float floatIntensity={0.6}>
+          <group scale={isMobile ? 0.3 : 1}>
+            <Float floatIntensity={0.6}>
+              <Center disableY disableZ>
+                <SectionTitle
+                  size={0.8}
+                  position-y={1.6}
+                  position-z={-3}
+                  bevelEnabled
+                  bevelThickness={0.3}
+                >
+                  {config.home.title}
+                </SectionTitle>
+              </Center>
+            </Float>
             <Center disableY disableZ>
               <SectionTitle
-                size={0.8}
-                position-y={1.6}
+                size={1.2}
+                position-x={-2.6}
                 position-z={-3}
                 bevelEnabled
                 bevelThickness={0.3}
+                rotation-y={Math.PI / 10}
               >
-                {config.home.title}
+                {config.home.subtitle}
               </SectionTitle>
             </Center>
-          </Float>
-          <Center disableY disableZ>
-            <SectionTitle
-              size={1.2}
-              position-x={-2.6}
-              position-z={-3}
-              bevelEnabled
-              bevelThickness={0.3}
-              rotation-y={Math.PI / 10}
-            >
-              {config.home.subtitle}
-            </SectionTitle>
-          </Center>
+          </group>
         </motion.group>
         {/* SKILLS */}
         <motion.group
-          position-z={SECTION_DISTANCE}
+          position-x={isMobile ? SECTION_DISTANCE : 0}
+          position-z={isMobile ? -4 : SECTION_DISTANCE}
           position-y={-5}
           variants={{ skills: { y: 0 } }}
         >
-          <group position-x={-2}>
+          <group position-x={isMobile ? 0 : -2}>
             <SectionTitle position-z={1.5} rotation-y={Math.PI / 6}>
               SKILLS
             </SectionTitle>
@@ -127,11 +159,12 @@ export const Experience = () => {
         </motion.group>
         {/* PROJECTS */}
         <motion.group
-          position-z={2 * SECTION_DISTANCE}
+          position-x={isMobile ? 2 * SECTION_DISTANCE : 0}
+          position-z={isMobile ? -3 : 2 * SECTION_DISTANCE}
           position-y={-5}
           variants={{ projects: { y: 0 } }}
         >
-          <group position-x={1}>
+          <group position-x={isMobile ? -0.25 : 1}>
             <SectionTitle
               position-x={-0.5}
               position-z={0}
@@ -152,6 +185,11 @@ export const Experience = () => {
                 rotation-y={-Math.PI / 2}
                 position-z={-1}
               />
+              <MonitorScreen
+                rotation-x={-0.18}
+                position-z={-0.895}
+                position-y={1.74}
+              />
               <RoundedBox scale-x={2} position-y={0.5} position-z={-1}>
                 <meshStandardMaterial color="white" />
               </RoundedBox>
@@ -160,14 +198,18 @@ export const Experience = () => {
         </motion.group>
         {/* CONTACT */}
         <motion.group
-          position-z={3 * SECTION_DISTANCE}
+          position-x={isMobile ? 3 * SECTION_DISTANCE : 0}
+          position-z={isMobile ? -4 : 3 * SECTION_DISTANCE}
           position-y={-5}
           variants={{ contact: { y: 0 } }}
         >
-          <SectionTitle position-x={-2} position-z={0.6}>
+          <SectionTitle
+            position-x={isMobile ? -1.1 : -2 * scaleFactor}
+            position-z={0.6}
+          >
             CONTACT
           </SectionTitle>
-          <group position-x={-2}>
+          <group position-x={-2 * scaleFactor}>
             <ParkBench
               scale={0.5}
               position-x={-0.5}
@@ -200,8 +242,8 @@ export const Experience = () => {
           />
           <Float floatIntensity={1.5} speed={3}>
             <Pigeon
-              position-x={2}
-              position-y={1.5}
+              position-x={isMobile ? 0 : 2 * scaleFactor}
+              position-y={isMobile ? 2.2 : 1.5}
               position-z={-0.5}
               scale={0.3}
             />
