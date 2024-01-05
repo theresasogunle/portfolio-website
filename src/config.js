@@ -72,12 +72,12 @@ export const config = {
         },
       ],
       contact: {
-        name: "Wawa Sensei",
-        address: "Tokyo, Japan",
+        name: "Wunmi, Sogunle",
+        address: "Lagos, Nigeria",
         socials: {
-          linkedin: "https://www.linkedin.com/in/wassim-samad/",
-          twitter: "https://twitter.com/wawasensei",
+          linkedin: "https://www.linkedin.com/in/wunmi",
+          twitter: "https://twitter.com/thewunmis",
         },
-        mail: "contact@wawasensei.dev",
+        mail: "hello@thewunmis.com",
       },
 }

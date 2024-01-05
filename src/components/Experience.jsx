@@ -1,6 +1,6 @@
 import { ContactShadows, Environment, useScroll } from "@react-three/drei";
 import { Avatar } from "./Avatar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, ElementRef, } from "react";
 import { SectionTitle } from "./SectionTitle";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
